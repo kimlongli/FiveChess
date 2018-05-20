@@ -7,19 +7,19 @@
 ### 对外接口
 五子棋AI的实现在ChessEngine.h和ChessEngine.cpp里，其余为界面实现，若想把此五子棋AI整合到自己项目中，可把ChessEngine.h和ChessEngine.cpp拷贝出来单独使用。接口详情如下：
 * void beforeStart();
-五子棋AI的一些初始化操作，可在程序开始运行时调用
+五子棋AI的一些初始化操作，可在程序开始运行时调用。
 * int isSomeOneWin(); 
 判断此时是否有谁（电脑或者人）赢了，电脑赢了返回1， 人赢了返回0， 否则返回-1。
 * string takeBack(); 
-悔棋，返回参数为一个15\*15长度的字符串，代表当前棋盘布局，'0'代表无棋子，'1'代表一种棋子，'2'代表另一种棋子
+悔棋，返回参数为一个15\*15长度的字符串，代表当前棋盘布局，'0'代表无棋子，'1'代表一种棋子，'2'代表另一种棋子。
 * string reset(int role); 
 清除之前的记录，重新开局。role为0时为人先走，为1时为电脑先走。返回值为新的棋盘布局。
 * void setLevel(int level);
 重新设置搜索层数。
 * Position getLastPosition();
-取得刚才电脑下的那一步棋子的位置
+取得刚才电脑下的那一步棋子的位置。
 * string nextStep(int x, int y);
-人类在位置为(x, y)的地方下棋，电脑进行计算，返回新的棋盘布局.
+人类在位置为(x, y)的地方下棋，电脑进行计算，返回新的棋盘布局。
 
 
 使用实例详见FiveChess.cpp
