@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 using namespace std;
 
 namespace ChessEngine {
@@ -55,6 +56,9 @@ namespace ChessEngine {
 
 	//人类下棋，返回棋盘，传给界面
 	string nextStep(int x, int y);
+
+	//获取棋谱
+	vector<Position> getChessManual();
 
 
 };

@@ -578,10 +578,7 @@ namespace ChessEngine {
 
 			printBoard(board);
 
-			char *chs = new char[15 * 15 + 1];
-			strncpy_s(chs, 15 * 15 + 1, resultStr.c_str(), resultStr.length());
-
-			return chs;
+			return resultStr;
 		}
 
 
@@ -697,6 +694,18 @@ namespace ChessEngine {
 		printBoard(board);
 
 		return resultStr;
+	}
+
+	//»ñÈ¡ÆåÆ×
+	vector<Position> getChessManual() {
+		vector<Position> result;
+
+		while (!moves.empty()) {
+			result.insert(result.begin(), moves.top());
+			moves.pop();
+		}
+
+		return result;
 	}
 
 

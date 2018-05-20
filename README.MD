@@ -1,8 +1,9 @@
 
 ### 可执行程序下载
 点击以下链接下载相应版本的可执行程序：
-[v0.1](https://kimlongli.github.io/files/fivechess.zip)
-[v1.0](https://kimlongli.github.io/files/fivechess1.0.zip)
+* [v0.1](https://kimlongli.github.io/files/fivechess.zip) 初始版本
+* [v1.0](https://kimlongli.github.io/files/fivechess1.0.zip) 使用C++重写界面
+* [v1.1](https://kimlongli.github.io/files/fivechess1.1.zip) 加入保存和查看棋谱的功能
 
 ### 原理
 本程序所用到的算法以及优化技术可参见[这篇技术博客](https://kimlongli.github.io/2016/12/14/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E8%BF%98%E5%8F%AF%E4%BB%A5%E7%9A%84%E4%BA%94%E5%AD%90%E6%A3%8BAI/)。
@@ -32,3 +33,5 @@
 ![PicForReadMe/pic1.png](PicForReadMe/pic1.png)
 * 对局结束截图
 ![PicForReadMe/pic2.png](PicForReadMe/pic2.png)
+* 查看棋谱截图
+![PicForReadMe/pic2.png](PicForReadMe/pic3.png)
