@@ -53,7 +53,7 @@ namespace ChessEngine {
 	int scores[2][72];  //保存棋局分数（2个角色72行，包括横竖撇捺）
 	int allScore[2];	//局面总评分（2个角色）
 
-						//记录计算结果在哈希表中
+	//记录计算结果在哈希表中
 	void recordHashItem(int depth, int score, HashItem::Flag flag) {
 		int index = (int)(currentZobristValue & HASH_ITEM_INDEX_MASK);
 		HashItem *phashItem = &hashItems[index];
