@@ -1,0 +1,31 @@
+
+### 可执行程序下载
+点击以下链接下载相应版本的可执行程序：
+[v0.1](https://kimlongli.github.io/files/fivechess.zip)
+[v1.0](https://kimlongli.github.io/files/fivechess1.0.zip)
+
+### 对外接口
+五子棋AI的实现在ChessEngine.h和ChessEngine.cpp里，其余为界面实现，若想把此五子棋AI整合到自己项目中，可把ChessEngine.h和ChessEngine.cpp拷贝出来单独使用。接口详情如下：
+* void beforeStart();
+五子棋AI的一些初始化操作，可在程序开始运行时调用
+* int isSomeOneWin(); 
+判断此时是否有谁（电脑或者人）赢了，电脑赢了返回1， 人赢了返回0， 否则返回-1。
+* string takeBack(); 
+悔棋，返回参数为一个15\*15长度的字符串，代表当前棋盘布局，'0'代表无棋子，'1'代表一种棋子，'2'代表另一种棋子
+* string reset(int role); 
+清除之前的记录，重新开局。role为0时为人先走，为1时为电脑先走。
+* void setLevel(int level);
+重新设置搜索层数。
+* Position getLastPosition();
+取得刚才电脑下得那一步棋子的位置
+* string nextStep(int x, int y);
+人类在位置为(x, y)的地方下棋，电脑进行计算，返回新的棋盘
+
+
+使用实例详见FiveChess.cpp
+
+### 运行截图
+* 新对局截图
+![PicForReadMe/pic1.png](PicForReadMe/pic1.png)
+* 对局结束截图
+![PicForReadMe/pic2.png](PicForReadMe/pic2.png)
