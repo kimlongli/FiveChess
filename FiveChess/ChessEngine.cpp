@@ -663,7 +663,7 @@ Position getLastPosition() {
     return searchResult;
 }
 
-//人类下棋，返回棋盘，传给python界面
+//人类下棋，返回棋盘，传给界面
 string nextStep(int x, int y) {
 
     moves.push(Position(x, y));
@@ -679,7 +679,9 @@ string nextStep(int x, int y) {
     updateScore(board, result);
     //printBoard(board);
 
-    moves.push(Position(result.x, result.y));
+    //若双方还未决出胜负，则把棋子位置加入到历史记录中
+    if(winner == -1)
+        moves.push(Position(result.x, result.y));
 
     string resultStr;
     int i, j;
