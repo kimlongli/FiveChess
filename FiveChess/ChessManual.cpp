@@ -120,6 +120,11 @@ void ChessManual::SaveToFile(TCHAR *filename) {
 	fs.close();
 }
 
+ChessEngine::Position ChessManual::GetLastPosition() {
+    if(currentIndex != -1)
+        return moves[currentIndex];
+    return ChessEngine::Position(-1, -1);
+}
 
 ChessManual::~ChessManual()
 {
