@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ChessEngine.h"
+#include "ACSearcher.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -7,6 +8,7 @@
 #include <vector>
 #include <cmath>
 #include <stack>
+#include <cassert>
 using namespace std;
 
 namespace ChessEngine {
@@ -20,22 +22,47 @@ int DEPTH = 7;
 
 enum Role { HUMAN = 1, COMPUTOR = 2, EMPTY = 0 };
 
-
-//特征结构体，存储诸如"++OOO++"这样的特征
-struct Mode {
-    char str[10];    //特征字符串
-    int score;
-    Mode(const char str[10], int score) {
-        strncpy_s(this->str, str, 10);
-        this->score = score;
-    }
-
-    bool operator <(const Mode &mode) const {
-        return strcmp(str, mode.str) < 0 ? true : false;
-    }
+//模式
+vector<string> paterns = {
+    "11111",
+    "011110",
+    "011100",
+    "001110",
+    "011010",
+    "010110",
+    "11110",
+    "01111",
+    "11011",
+    "10111",
+    "11101",
+    "001100",
+    "001010",
+    "010100",
+    "000100",
+    "001000"
 };
 
-//保存棋局的哈希表
+//模式相应的分数
+vector<int> paternScores = {
+    50000,
+    4320,
+    720,
+    720,
+    720,
+    720,
+    720,
+    720,
+    720,
+    720,
+    720,
+    120,
+    120,
+    120,
+    20,
+    20
+};
+
+//保存棋局的哈希表条目
 struct HashItem {
     long long checksum;
     int depth;
@@ -52,6 +79,8 @@ int winner;     //胜出者
 stack<Position> moves;
 int scores[2][72];  //保存棋局分数（2个角色72行，包括横竖撇捺）
 int allScore[2];    //局面总评分（2个角色）
+
+ACSearcher acs;
 
 //记录计算结果在哈希表中
 void recordHashItem(int depth, int score, HashItem::Flag flag) {
@@ -116,8 +145,6 @@ void initCurrentZobristValue() {
     currentZobristValue = random64();
 }
 
-//存储特征的set
-set<Mode> modes;
 //存储搜索结果，即下一步棋子的位置
 Position searchResult;
 
@@ -133,7 +160,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
 
     string lines[4];
     string lines1[4];
-    for (i = max(0, p.x - 4); i < min(BOARD_WIDTH, p.x + 5); i++) {
+    for (i = max(0, p.x - 5); i < min(BOARD_WIDTH, p.x + 6); i++) {
         if (i != p.x) {
             lines[0].push_back(board[i][p.y] == role ? '1' : board[i][p.y] == 0 ? '0' : '2');
             lines1[0].push_back(board[i][p.y] == role ? '2' : board[i][p.y] == 0 ? '0' : '1');
@@ -143,7 +170,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[0].push_back('1');
         }
     }
-    for (i = max(0, p.y - 4); i < min(BOARD_WIDTH, p.y + 5); i++) {
+    for (i = max(0, p.y - 5); i < min(BOARD_WIDTH, p.y + 6); i++) {
         if (i != p.y) {
             lines[1].push_back(board[p.x][i] == role ? '1' : board[p.x][i] == 0 ? '0' : '2');
             lines1[1].push_back(board[p.x][i] == role ? '2' : board[p.x][i] == 0 ? '0' : '1');
@@ -153,7 +180,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[1].push_back('1');
         }
     }
-    for (i = p.x - min(min(p.x, p.y), 4), j = p.y - min(min(p.x, p.y), 4); i < min(BOARD_WIDTH, p.x + 5) && j < min(BOARD_WIDTH, p.y + 5); i++, j++) {
+    for (i = p.x - min(min(p.x, p.y), 5), j = p.y - min(min(p.x, p.y), 5); i < min(BOARD_WIDTH, p.x + 6) && j < min(BOARD_WIDTH, p.y + 6); i++, j++) {
         if (i != p.x) {
             lines[2].push_back(board[i][j] == role ? '1' : board[i][j] == 0 ? '0' : '2');
             lines1[2].push_back(board[i][j] == role ? '2' : board[i][j] == 0 ? '0' : '1');
@@ -163,7 +190,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[2].push_back('1');
         }
     }
-    for (i = p.x + min(min(p.y, BOARD_WIDTH - 1 - p.x), 4), j = p.y - min(min(p.y, BOARD_WIDTH - 1 - p.x), 4); i >= max(0, p.x - 4) && j < min(BOARD_WIDTH, p.y + 5); i--, j++) {
+    for (i = p.x + min(min(p.y, BOARD_WIDTH - 1 - p.x), 5), j = p.y - min(min(p.y, BOARD_WIDTH - 1 - p.x), 5); i >= max(0, p.x - 5) && j < min(BOARD_WIDTH, p.y + 6); i--, j++) {
         if (i != p.x) {
             lines[3].push_back(board[i][j] == role ? '1' : board[i][j] == 0 ? '0' : '2');
             lines1[3].push_back(board[i][j] == role ? '2' : board[i][j] == 0 ? '0' : '1');
@@ -174,41 +201,15 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
         }
     }
 
-    set<Mode>::iterator iter;
     for (i = 0; i < 4; i++) {
-        for (j = 0; j + 5 <= (int)lines[i].length();) {
-            iter = modes.find(Mode(lines[i].substr(j, 6).c_str(), 0));
-            if (iter != modes.end()) {
-                result += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            iter = modes.find(Mode(lines[i].substr(j, 5).c_str(), 0));
-            if (iter != modes.end()) {
-                result += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            j++;
+        vector<int> tmp = acs.ACSearch(lines[i]);
+        for (j = 0; j < tmp.size(); j++) {
+            result += paternScores[tmp[j]];
         }
-        for (j = 0; j + 5 <= (int)lines1[i].length();) {
-            iter = modes.find(Mode(lines1[i].substr(j, 6).c_str(), 0));
-            if (iter != modes.end()) {
-                result += (*iter).score;
-                j += 5;
-                continue;
-            }
 
-            iter = modes.find(Mode(lines1[i].substr(j, 5).c_str(), 0));
-            if (iter != modes.end()) {
-                result += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            j++;
+        tmp = acs.ACSearch(lines1[i]);
+        for (j = 0; j < tmp.size(); j++) {
+            result += paternScores[tmp[j]];
         }
     }
 
@@ -274,45 +275,18 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
     memset(lineScore, 0, sizeof(lineScore));
     memset(line1Score, 0, sizeof(line1Score));
 
-    set<Mode>::iterator iter;
+    //计算分数
     for (i = 0; i < 4; i++) {
-        for (j = 0; j + 5 <= (int)lines[i].length();) {
-            iter = modes.find(Mode(lines[i].substr(j, 6).c_str(), 0));
-            if (iter != modes.end()) {
-                lineScore[i] += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            iter = modes.find(Mode(lines[i].substr(j, 5).c_str(), 0));
-            if (iter != modes.end()) {
-                lineScore[i] += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            j++;
+        vector<int> result = acs.ACSearch(lines[i]);
+        for (j = 0; j < result.size(); j++) {
+            lineScore[i] += paternScores[result[j]];
         }
 
-        for (j = 0; j + 5 <= (int)lines1[i].length();) {
-            iter = modes.find(Mode(lines1[i].substr(j, 6).c_str(), 0));
-            if (iter != modes.end()) {
-                line1Score[i] += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            iter = modes.find(Mode(lines1[i].substr(j, 5).c_str(), 0));
-            if (iter != modes.end()) {
-                line1Score[i] += (*iter).score;
-                j += 5;
-                continue;
-            }
-
-            j++;
+        result = acs.ACSearch(lines1[i]);
+        for (j = 0; j < result.size(); j++) {
+            line1Score[i] += paternScores[result[j]];
         }
     }
-
 
     int a = p.y;
     int b = BOARD_WIDTH + p.x;
@@ -323,8 +297,6 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
         allScore[i] -= scores[i][a];
         allScore[i] -= scores[i][b];
     }
-
-
 
     //scores顺序 竖、横、\、/
     scores[0][a] = lineScore[0];
@@ -338,8 +310,6 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
         allScore[i] += scores[i][a];
         allScore[i] += scores[i][b];
     }
-
-
 
     if (p.y - p.x >= -10 && p.y - p.x <= 10) {
 
@@ -505,25 +475,12 @@ Position getAGoodMove(char board[BOARD_WIDTH][BOARD_WIDTH]) {
 
 //初始化函数，插入特征和分值
 void init() {
-    modes.insert(Mode("11111", 50000));
-    modes.insert(Mode("011111", 50000));
-    modes.insert(Mode("111110", 50000));
-    modes.insert(Mode("011110", 4320));
-    modes.insert(Mode("011100", 720));
-    modes.insert(Mode("001110", 720));
-    modes.insert(Mode("011010", 720));
-    modes.insert(Mode("010110", 720));
-    modes.insert(Mode("11110", 720));
-    modes.insert(Mode("01111", 720));
-    modes.insert(Mode("11011", 720));
-    modes.insert(Mode("10111", 720));
-    modes.insert(Mode("11101", 720));
-    modes.insert(Mode("001100", 120));
-    modes.insert(Mode("001010", 120));
-    modes.insert(Mode("010100", 120));
-    modes.insert(Mode("000100", 20));
-    modes.insert(Mode("001000", 20));
+    assert(paterns.size() == paternScores.size());
 
+    //初始化ACSearcher
+    acs.LoadPatern(paterns);
+    acs.BuildGotoTable();
+    acs.BuildFailTable();
 
     randomBoardZobristValue();
     currentZobristValue = random64();
