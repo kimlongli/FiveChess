@@ -15,6 +15,7 @@
 * 增量式的评分算法
 * 置换表
 * AC算法（用于模式匹配）
+
 具体可参见[这篇技术博客](https://kimlongli.github.io/2016/12/14/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E8%BF%98%E5%8F%AF%E4%BB%A5%E7%9A%84%E4%BA%94%E5%AD%90%E6%A3%8BAI/)。
 
 ### 对外接口
