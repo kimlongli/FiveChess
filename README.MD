@@ -4,9 +4,18 @@
 * [v0.1](https://kimlongli.github.io/files/fivechess.zip) 初始版本
 * [v1.0](https://kimlongli.github.io/files/fivechess1.0.zip) 使用C++重写界面
 * [v1.1](https://kimlongli.github.io/files/fivechess1.1.zip) 加入保存和查看棋谱的功能
+* [v1.2](https://kimlongli.github.io/files/fivechess1.2.zip) 加入AC算法和修复模式匹配的bug
 
 ### 原理
-本程序所用到的算法以及优化技术可参见[这篇技术博客](https://kimlongli.github.io/2016/12/14/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E8%BF%98%E5%8F%AF%E4%BB%A5%E7%9A%84%E4%BA%94%E5%AD%90%E6%A3%8BAI/)。
+本程序所用到的算法以及优化技术有：
+* 博弈树
+* alpha-beta剪枝
+* 加入启发式搜索
+* 每层选取最有可能出现的10种可能
+* 增量式的评分算法
+* 置换表
+* AC算法（用于模式匹配）
+具体可参见[这篇技术博客](https://kimlongli.github.io/2016/12/14/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E8%BF%98%E5%8F%AF%E4%BB%A5%E7%9A%84%E4%BA%94%E5%AD%90%E6%A3%8BAI/)。
 
 ### 对外接口
 五子棋AI的实现在ChessEngine.h和ChessEngine.cpp里，其余为界面实现，若想把此五子棋AI整合到自己项目中，可把ChessEngine.h和ChessEngine.cpp拷贝出来单独使用。接口详情如下：
