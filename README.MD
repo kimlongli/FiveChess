@@ -5,6 +5,7 @@
 * [v1.0](https://kimlongli.github.io/files/fivechess1.0.zip) 使用C++重写界面
 * [v1.1](https://kimlongli.github.io/files/fivechess1.1.zip) 加入保存和查看棋谱的功能
 * [v1.2](https://kimlongli.github.io/files/fivechess1.2.zip) 加入AC算法和修复模式匹配的bug
+* [v1.3](https://kimlongli.github.io/files/fivechess1.3.zip) 加入qq五子棋辅助彩蛋
 
 ### 原理
 本程序所用到的算法以及优化技术有：
