@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ChessEngine.h"
 #include "ACSearcher.h"
+#include "PossiblePositionManager.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -19,8 +20,6 @@ namespace ChessEngine {
 #define MAX_SCORE (10000000)
 #define MIN_SCORE (-10000000)
 int DEPTH = 7;
-
-enum Role { HUMAN = 1, COMPUTOR = 2, EMPTY = 0 };
 
 //模式
 vector<string> paterns = {
@@ -80,7 +79,10 @@ stack<Position> moves;
 int scores[2][72];  //保存棋局分数（2个角色72行，包括横竖撇捺）
 int allScore[2];    //局面总评分（2个角色）
 
+//ac算法实现的模式匹配器
 ACSearcher acs;
+
+PossiblePositionManager ppm;
 
 //记录计算结果在哈希表中
 void recordHashItem(int depth, int score, HashItem::Flag flag) {
@@ -340,7 +342,7 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
 
 
 //生成下一步可以走的位置
-set<Position> createPossiblePosition(char board[BOARD_WIDTH][BOARD_WIDTH]) {
+/*set<Position> createPossiblePosition(char board[BOARD_WIDTH][BOARD_WIDTH]) {
     int i, j;
 
     set<Position> possiblePossitions;
@@ -385,7 +387,7 @@ set<Position> createPossiblePosition(char board[BOARD_WIDTH][BOARD_WIDTH]) {
     }
 
     return possiblePossitions;
-}
+}*/
 
 //alpha-beta剪枝
 int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int beta, Role currentSearchRole) {
@@ -412,23 +414,39 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
         return score1 - score2;
     }
 
-    set<Position> possiblePossitions = createPossiblePosition(board);
+    //set<Position> possiblePossitions = createPossiblePosition(board);
 
 
     int count = 0;
-    while (!possiblePossitions.empty()) {
-        Position p = *possiblePossitions.begin();
+    set<Position> possiblePositions;
+    set<Position> tmpPossiblePositions = ppm.GetCurrentPossiblePositions();
 
-        possiblePossitions.erase(possiblePossitions.begin());
+    //对当前可能出现的位置进行粗略评分
+    set<Position>::iterator iter;
+    for (iter = tmpPossiblePositions.begin(); iter != tmpPossiblePositions.end(); iter++) {
+        possiblePositions.insert(Position(iter->x, iter->y, evaluatePoint(board, *iter)));
+    }
+
+    while (!possiblePositions.empty()) {
+        Position p = *possiblePositions.begin();
+
+        possiblePositions.erase(possiblePositions.begin());
+
         //放置棋子
         board[p.x][p.y] = currentSearchRole;
         currentZobristValue ^= boardZobristValue[currentSearchRole - 1][p.x][p.y];
         updateScore(board, p);
 
+        //增加可能出现的位置
+        p.score = 0;
+        ppm.AddPossiblePositions(board, p);
 
         int val = -abSearch(board, depth - 1, -beta, -alpha, currentSearchRole == HUMAN ? COMPUTOR : HUMAN);
         if (depth == DEPTH)
             cout << "score(" << p.x << "," << p.y << "):" << val << endl;
+        
+        //取消上一次增加的可能出现的位置
+        ppm.Rollback();
 
         //取消放置
         board[p.x][p.y] = 0;
@@ -550,6 +568,9 @@ string takeBack() {
     board[previousPosition.x][previousPosition.y] = EMPTY;
     updateScore(board, previousPosition);
 
+    ppm.Rollback();
+    ppm.Rollback();
+
     string resultStr;
     int i, j;
     for (i = 0; i < BOARD_WIDTH; i++) {
@@ -585,14 +606,18 @@ string reset(int role) {
         hashItems[i].flag = HashItem::EMPTY;
     }
 
+    //初始化棋盘
+    memset(board, EMPTY, BOARD_WIDTH * BOARD_WIDTH * sizeof(char));
+
+    //清楚上一局可能出现的位置
+    ppm.RemoveAll();
 
     //用户先走
     if (role == 0) {
-        memset(board, EMPTY, BOARD_WIDTH * BOARD_WIDTH * sizeof(char));
+        // do nothing
     }
     //电脑先走
     else if (role == 1) {
-        memset(board, EMPTY, BOARD_WIDTH * BOARD_WIDTH * sizeof(char));
         currentZobristValue ^= boardZobristValue[COMPUTOR - 1][7][7];
         board[7][7] = COMPUTOR;
         updateScore(board, Position(7, 7));
@@ -600,9 +625,10 @@ string reset(int role) {
         moves.push(Position(7, 7));
         searchResult = Position(7, 7);
 
+        ppm.AddPossiblePositions(board, Position(7, 7));
+
         //第一步默认走7，7的位置
         chs[7 + 7 * 15] = '2';
-        return chs;
     }
 
     winner = -1;
@@ -624,17 +650,22 @@ Position getLastPosition() {
 string nextStep(int x, int y) {
 
     moves.push(Position(x, y));
-
+    
     board[x][y] = HUMAN;
     currentZobristValue ^= boardZobristValue[HUMAN - 1][x][y];
     updateScore(board, Position(x, y));
-    //printBoard(board);
+
+    //增加可能出现的位置
+    ppm.AddPossiblePositions(board, Position(x, y));
 
     Position result = getAGoodMove(board);
+
     board[result.x][result.y] = COMPUTOR;
     currentZobristValue ^= boardZobristValue[COMPUTOR - 1][result.x][result.y];
     updateScore(board, result);
-    //printBoard(board);
+
+    //增加可能出现的位置
+    ppm.AddPossiblePositions(board, result);
 
     //若双方还未决出胜负，则把棋子位置加入到历史记录中
     if(winner == -1)

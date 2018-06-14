@@ -152,6 +152,7 @@
     <ClInclude Include="ChessEngine.h" />
     <ClInclude Include="ChessManual.h" />
     <ClInclude Include="FiveChess.h" />
+    <ClInclude Include="PossiblePositionManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="ChessEngine.cpp" />
     <ClCompile Include="ChessManual.cpp" />
     <ClCompile Include="FiveChess.cpp" />
+    <ClCompile Include="PossiblePositionManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

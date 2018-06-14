@@ -6,6 +6,8 @@ using namespace std;
 
 namespace ChessEngine {
 
+    enum Role { HUMAN = 1, COMPUTOR = 2, EMPTY = 0 };
+
     //位置结构体，行是x，列是y
     struct Position {
         int x;
