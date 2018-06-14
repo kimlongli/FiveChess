@@ -153,7 +153,8 @@ Position searchResult;
 
 //根据位置评分，其中board是当前棋盘，p是位置，role是评分角色，比如role是Human则是相对人类评分，比如role是computer则是对于电脑评分
 int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
-    int result, i, j;
+    int result;
+    unsigned int i, j;
     int role;
 
     result = 0;
@@ -162,7 +163,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
 
     string lines[4];
     string lines1[4];
-    for (i = max(0, p.x - 5); i < min(BOARD_WIDTH, p.x + 6); i++) {
+    for (i = max(0, p.x - 5); i < (unsigned int)min(BOARD_WIDTH, p.x + 6); i++) {
         if (i != p.x) {
             lines[0].push_back(board[i][p.y] == role ? '1' : board[i][p.y] == 0 ? '0' : '2');
             lines1[0].push_back(board[i][p.y] == role ? '2' : board[i][p.y] == 0 ? '0' : '1');
@@ -172,7 +173,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[0].push_back('1');
         }
     }
-    for (i = max(0, p.y - 5); i < min(BOARD_WIDTH, p.y + 6); i++) {
+    for (i = max(0, p.y - 5); i < (unsigned int)min(BOARD_WIDTH, p.y + 6); i++) {
         if (i != p.y) {
             lines[1].push_back(board[p.x][i] == role ? '1' : board[p.x][i] == 0 ? '0' : '2');
             lines1[1].push_back(board[p.x][i] == role ? '2' : board[p.x][i] == 0 ? '0' : '1');
@@ -182,7 +183,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[1].push_back('1');
         }
     }
-    for (i = p.x - min(min(p.x, p.y), 5), j = p.y - min(min(p.x, p.y), 5); i < min(BOARD_WIDTH, p.x + 6) && j < min(BOARD_WIDTH, p.y + 6); i++, j++) {
+    for (i = p.x - min(min(p.x, p.y), 5), j = p.y - min(min(p.x, p.y), 5); i < (unsigned int)min(BOARD_WIDTH, p.x + 6) && j < (unsigned int)min(BOARD_WIDTH, p.y + 6); i++, j++) {
         if (i != p.x) {
             lines[2].push_back(board[i][j] == role ? '1' : board[i][j] == 0 ? '0' : '2');
             lines1[2].push_back(board[i][j] == role ? '2' : board[i][j] == 0 ? '0' : '1');
@@ -192,7 +193,7 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
             lines1[2].push_back('1');
         }
     }
-    for (i = p.x + min(min(p.y, BOARD_WIDTH - 1 - p.x), 5), j = p.y - min(min(p.y, BOARD_WIDTH - 1 - p.x), 5); i >= max(0, p.x - 5) && j < min(BOARD_WIDTH, p.y + 6); i--, j++) {
+    for (i = p.x + min(min(p.y, BOARD_WIDTH - 1 - p.x), 5), j = p.y - min(min(p.y, BOARD_WIDTH - 1 - p.x), 5); i >= (unsigned int)max(0, p.x - 5) && j < (unsigned int)min(BOARD_WIDTH, p.y + 6); i--, j++) {
         if (i != p.x) {
             lines[3].push_back(board[i][j] == role ? '1' : board[i][j] == 0 ? '0' : '2');
             lines1[3].push_back(board[i][j] == role ? '2' : board[i][j] == 0 ? '0' : '1');
@@ -239,7 +240,7 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
 
     string lines[4];
     string lines1[4];
-    int i, j;
+    unsigned int i, j;
     int role = HUMAN;
 
     //竖
@@ -340,55 +341,6 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
     }
 }
 
-
-//生成下一步可以走的位置
-/*set<Position> createPossiblePosition(char board[BOARD_WIDTH][BOARD_WIDTH]) {
-    int i, j;
-
-    set<Position> possiblePossitions;
-    for (i = 0; i < BOARD_WIDTH; i++) {
-        for (j = 0; j < BOARD_WIDTH; j++) {
-            if (board[i][j] != 0) {
-                //left
-                if (i > 0 && board[i - 1][j] == 0) {
-                    possiblePossitions.insert(Position(i - 1, j, evaluatePoint(board, Position(i - 1, j))));
-                }
-                //right
-                if (i < BOARD_WIDTH - 1 && board[i + 1][j] == 0) {
-                    possiblePossitions.insert(Position(i + 1, j, evaluatePoint(board, Position(i + 1, j))));
-                }
-                //up
-                if (j > 0 && board[i][j - 1] == 0) {
-                    possiblePossitions.insert(Position(i, j - 1, evaluatePoint(board, Position(i, j - 1))));
-                }
-                //down
-                if (j < BOARD_WIDTH - 1 && board[i][j + 1] == 0) {
-                    possiblePossitions.insert(Position(i, j + 1, evaluatePoint(board, Position(i, j + 1))));
-                }
-                //left up
-                if (i > 0 && j > 0 && board[i - 1][j - 1] == 0) {
-                    possiblePossitions.insert(Position(i - 1, j - 1, evaluatePoint(board, Position(i - 1, j - 1))));
-                }
-                //left down
-                if (i < BOARD_WIDTH - 1 && j > 0 && board[i + 1][j - 1] == 0) {
-                    possiblePossitions.insert(Position(i + 1, j - 1, evaluatePoint(board, Position(i + 1, j - 1))));
-                }
-                //right up
-                if (i > 0 && j < BOARD_WIDTH - 1 && board[i - 1][j + 1] == 0) {
-                    possiblePossitions.insert(Position(i - 1, j + 1, evaluatePoint(board, Position(i - 1, j + 1))));
-                }
-                //right down
-                if (i < BOARD_WIDTH - 1 && j < BOARD_WIDTH - 1 && board[i + 1][j + 1] == 0) {
-                    possiblePossitions.insert(Position(i + 1, j + 1, evaluatePoint(board, Position(i + 1, j + 1))));
-                }
-
-            }
-        }
-    }
-
-    return possiblePossitions;
-}*/
-
 //alpha-beta剪枝
 int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int beta, Role currentSearchRole) {
     HashItem::Flag flag = HashItem::ALPHA;
@@ -427,31 +379,27 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
         possiblePositions.insert(Position(iter->x, iter->y, evaluatePoint(board, *iter)));
     }
 
-    while (!possiblePositions.empty()) {
-        Position p = *possiblePositions.begin();
-
-        possiblePositions.erase(possiblePositions.begin());
-
+    //while (!possiblePositions.empty()) {
+    for(iter = possiblePositions.begin(); iter != possiblePositions.end(); iter++) {
         //放置棋子
-        board[p.x][p.y] = currentSearchRole;
-        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][p.x][p.y];
-        updateScore(board, p);
+        board[iter->x][iter->y] = currentSearchRole;
+        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][iter->x][iter->y];
+        updateScore(board, *iter);
 
         //增加可能出现的位置
-        p.score = 0;
-        ppm.AddPossiblePositions(board, p);
+        ppm.AddPossiblePositions(board, Position(iter->x, iter->y, 0));
 
         int val = -abSearch(board, depth - 1, -beta, -alpha, currentSearchRole == HUMAN ? COMPUTOR : HUMAN);
         if (depth == DEPTH)
-            cout << "score(" << p.x << "," << p.y << "):" << val << endl;
+            cout << "score(" << iter->x << "," << iter->y << "):" << val << endl;
         
         //取消上一次增加的可能出现的位置
         ppm.Rollback();
 
         //取消放置
-        board[p.x][p.y] = 0;
-        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][p.x][p.y];
-        updateScore(board, p);
+        board[iter->x][iter->y] = 0;
+        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][iter->x][iter->y];
+        updateScore(board, *iter);
 
         if (val >= beta) {
             recordHashItem(depth, beta, HashItem::BETA);
@@ -461,7 +409,7 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
             flag = HashItem::EXACT;
             alpha = val;
             if (depth == DEPTH) {
-                searchResult = p;
+                searchResult = *iter;
             }
         }
 
