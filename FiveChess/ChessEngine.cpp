@@ -379,27 +379,31 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
         possiblePositions.insert(Position(iter->x, iter->y, evaluatePoint(board, *iter)));
     }
 
-    //while (!possiblePositions.empty()) {
-    for(iter = possiblePositions.begin(); iter != possiblePositions.end(); iter++) {
+    while (!possiblePositions.empty()) {
+        Position p = *possiblePositions.begin();
+
+        possiblePositions.erase(possiblePositions.begin());
+
         //放置棋子
-        board[iter->x][iter->y] = currentSearchRole;
-        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][iter->x][iter->y];
-        updateScore(board, *iter);
+        board[p.x][p.y] = currentSearchRole;
+        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][p.x][p.y];
+        updateScore(board, p);
 
         //增加可能出现的位置
-        ppm.AddPossiblePositions(board, Position(iter->x, iter->y, 0));
+        p.score = 0;
+        ppm.AddPossiblePositions(board, p);
 
         int val = -abSearch(board, depth - 1, -beta, -alpha, currentSearchRole == HUMAN ? COMPUTOR : HUMAN);
         if (depth == DEPTH)
-            cout << "score(" << iter->x << "," << iter->y << "):" << val << endl;
+            cout << "score(" << p.x << "," << p.y << "):" << val << endl;
         
         //取消上一次增加的可能出现的位置
         ppm.Rollback();
 
         //取消放置
-        board[iter->x][iter->y] = 0;
-        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][iter->x][iter->y];
-        updateScore(board, *iter);
+        board[p.x][p.y] = 0;
+        currentZobristValue ^= boardZobristValue[currentSearchRole - 1][p.x][p.y];
+        updateScore(board, p);
 
         if (val >= beta) {
             recordHashItem(depth, beta, HashItem::BETA);
@@ -409,7 +413,7 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
             flag = HashItem::EXACT;
             alpha = val;
             if (depth == DEPTH) {
-                searchResult = *iter;
+                searchResult = p;
             }
         }
 
