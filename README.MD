@@ -20,7 +20,7 @@
 具体可参见[这篇技术博客](https://kimlongli.github.io/2016/12/14/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E8%BF%98%E5%8F%AF%E4%BB%A5%E7%9A%84%E4%BA%94%E5%AD%90%E6%A3%8BAI/)。
 
 ### 对外接口
-五子棋AI的实现在ChessEngine.h和ChessEngine.cpp里，其余为界面实现，若想把此五子棋AI整合到自己项目中，可把ChessEngine.h和ChessEngine.cpp拷贝出来单独使用。接口详情如下：
+五子棋AI的实现在ChessEngine.h和ChessEngine.cpp里，其余为界面实现，若想把此五子棋AI整合到自己项目中，可把ChessEngine.h和ChessEngine.cpp拷贝出来单独使用(这两个文件依赖于ACSearcher.h、PossiblePositionManager.h以及相应的cpp文件)。接口详情如下：
 * void beforeStart();
 五子棋AI的一些初始化操作，可在程序开始运行时调用。
 * int isSomeOneWin(); 

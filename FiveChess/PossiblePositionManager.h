@@ -21,9 +21,11 @@ public:
     void Rollback();
     set<ChessEngine::Position> GetCurrentPossiblePositions();
     void RemoveAll();
+    void SetEvaluateFunc(int(*evaluateFunc)(char board[15][15], ChessEngine::Position p));
 private:
     set<ChessEngine::Position> currentPossiblePositions;
     vector<HistoryItem> history;
     vector<pair<int, int> > directions;
+    int (*evaluateFunc)(char board[15][15], ChessEngine::Position p);
 };
 
