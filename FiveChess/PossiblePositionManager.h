@@ -19,7 +19,7 @@ public:
     ~PossiblePositionManager();
     void AddPossiblePositions(char board[15][15], const ChessEngine::Position& p);
     void Rollback();
-    set<ChessEngine::Position> GetCurrentPossiblePositions();
+    const set<ChessEngine::Position>& GetCurrentPossiblePositions();
     void RemoveAll();
     void SetEvaluateFunc(int(*evaluateFunc)(char board[15][15], ChessEngine::Position p));
 private:

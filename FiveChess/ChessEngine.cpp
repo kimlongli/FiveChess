@@ -371,7 +371,7 @@ int abSearch(char board[BOARD_WIDTH][BOARD_WIDTH], int depth, int alpha, int bet
 
     int count = 0;
     set<Position> possiblePositions;
-    set<Position> tmpPossiblePositions = ppm.GetCurrentPossiblePositions();
+    const set<Position>& tmpPossiblePositions = ppm.GetCurrentPossiblePositions();
 
     //对当前可能出现的位置进行粗略评分
     set<Position>::iterator iter;

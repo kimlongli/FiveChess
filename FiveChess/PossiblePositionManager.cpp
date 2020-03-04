@@ -79,7 +79,7 @@ void PossiblePositionManager::Rollback() {
         currentPossiblePositions.insert(hi.removedPosition);
 }
 
-set<ChessEngine::Position> PossiblePositionManager::GetCurrentPossiblePositions() {
+const set<ChessEngine::Position>& PossiblePositionManager::GetCurrentPossiblePositions() {
     return currentPossiblePositions;
 }
 
