@@ -14,8 +14,6 @@ struct ACNode {
     {
     }
 
-    ACNode() {}
-
     char ch;
     map<char, int> sons;
     int fail;
@@ -30,7 +28,7 @@ public:
     ACSearcher();
     ~ACSearcher();
 
-    void LoadPatern(const vector<string>& paterns);
+    void LoadPattern(const vector<string>& paterns);
     void BuildGotoTable();
     void BuildFailTable();
     vector<int> ACSearch(const string& text);           //返回匹配到的模式的索引

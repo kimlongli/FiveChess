@@ -19,7 +19,7 @@ ACSearcher::~ACSearcher()
 }
 
 
-void ACSearcher::LoadPatern(const vector<string>& paterns) {
+void ACSearcher::LoadPattern(const vector<string>& paterns) {
     this->paterns = paterns;
 }
 

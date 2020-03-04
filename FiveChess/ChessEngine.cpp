@@ -21,44 +21,29 @@ namespace ChessEngine {
 #define MIN_SCORE (-10000000)
 int DEPTH = 7;
 
-//模式
-vector<string> paterns = {
-    "11111",
-    "011110",
-    "011100",
-    "001110",
-    "011010",
-    "010110",
-    "11110",
-    "01111",
-    "11011",
-    "10111",
-    "11101",
-    "001100",
-    "001010",
-    "010100",
-    "000100",
-    "001000"
+struct Pattern {
+    string pattern;
+    int score;
 };
 
-//模式相应的分数
-vector<int> paternScores = {
-    50000,
-    4320,
-    720,
-    720,
-    720,
-    720,
-    720,
-    720,
-    720,
-    720,
-    720,
-    120,
-    120,
-    120,
-    20,
-    20
+//模式
+vector<Pattern> patterns = {
+    { "11111",  50000 },
+    { "011110", 4320 },
+    { "011100", 720 },
+    { "001110", 720 },
+    { "011010", 720 },
+    { "010110", 720 },
+    { "11110",  720 },
+    { "01111",  720 },
+    { "11011",  720 },
+    { "10111",  720 },
+    { "11101",  720 },
+    { "001100", 120 },
+    { "001010", 120 },
+    { "010100", 120 },
+    { "000100", 20 },
+    { "001000", 20 },
 };
 
 //保存棋局的哈希表条目
@@ -207,12 +192,12 @@ int evaluatePoint(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
     for (i = 0; i < 4; i++) {
         vector<int> tmp = acs.ACSearch(lines[i]);
         for (j = 0; j < tmp.size(); j++) {
-            result += paternScores[tmp[j]];
+            result += patterns[tmp[j]].score;
         }
 
         tmp = acs.ACSearch(lines1[i]);
         for (j = 0; j < tmp.size(); j++) {
-            result += paternScores[tmp[j]];
+            result += patterns[tmp[j]].score;
         }
     }
 
@@ -282,12 +267,12 @@ void updateScore(char board[BOARD_WIDTH][BOARD_WIDTH], Position p) {
     for (i = 0; i < 4; i++) {
         vector<int> result = acs.ACSearch(lines[i]);
         for (j = 0; j < result.size(); j++) {
-            lineScore[i] += paternScores[result[j]];
+            lineScore[i] += patterns[result[j]].score;
         }
 
         result = acs.ACSearch(lines1[i]);
         for (j = 0; j < result.size(); j++) {
-            line1Score[i] += paternScores[result[j]];
+            line1Score[i] += patterns[result[j]].score;
         }
     }
 
@@ -445,10 +430,13 @@ Position getAGoodMove(char board[BOARD_WIDTH][BOARD_WIDTH]) {
 
 //初始化函数，插入特征和分值
 void init() {
-    assert(paterns.size() == paternScores.size());
+    vector<string> patternStrs;
+    for (size_t i = 0; i < patterns.size(); i++) {
+        patternStrs.push_back(patterns[i].pattern);
+    }
 
     //初始化ACSearcher
-    acs.LoadPatern(paterns);
+    acs.LoadPattern(patternStrs);
     acs.BuildGotoTable();
     acs.BuildFailTable();
 
